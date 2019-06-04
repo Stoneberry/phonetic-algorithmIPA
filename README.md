@@ -1,2 +1,5 @@
 # phonetic-algorithmIPA
-Phonetic algorithm for IPA
+
+```
+pip install phonetic-algorithmIPA
+```
