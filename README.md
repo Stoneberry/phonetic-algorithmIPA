@@ -98,7 +98,7 @@ min - Расчет расстояний с нормализацией по дл�
 >>> arr_r
 ‘m;m\no;a;_u\nu;ʊ;o_\ns;s\ne;;_#\nh;h;'
 
->>> c = ipa.phonetic_distance(‘test3.csv’)
+>>> c = ipa.phonetic_distance(‘test3.csv’, 'rules.csv')
 [[0.36]]
 ```
 
