@@ -20,7 +20,7 @@ Note: пакет еще находится в разработке
 «ˌ» - для обозначения побочного ударения (pronunciation [prəˌnʌnsɪˈeɪʃn])
 
 # Getting started
-Пакет включает в себя модуль phonetic_distance. Чтобы приступить к работе, инициализируйте класс PhoneticAlgorithmIPA() из модуля phonetic_distance.
+Пакет включает в себя модуль phonetic_distance. Чтобы приступить к работе, инициализируйте класс PhoneticAlgorithmIPA() из модуля ipa_distances.
 
 ```
 >>> from phonetic_algorithmIPA import ipa_distances
