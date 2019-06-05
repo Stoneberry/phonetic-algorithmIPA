@@ -88,12 +88,17 @@ max - Расчет расстояний с нормализацией по са�
 min - Расчет расстояний с нормализацией по длине самого короткого слова;<br>
  
 ```
->>> with open('test2.csv', 'r', encoding='utf-8') as f:
+>>> with open('test3.csv', 'r', encoding='utf-8') as f:
        arr = f.read()
 >>> arr
-‘haʊ_2s;maʊ_2s’
+‘hou_2se;mouse’
 
->>> c = ipa.phonetic_distance(‘test2.csv’)
+>>> with open('rules.csv', 'r', encoding='utf-8') as f:
+       arr_r = f.read()
+>>> arr_r
+‘m;m\no;a;_u\nu;ʊ;o_\ns;s\ne;;_#\nh;h;'
+
+>>> c = ipa.phonetic_distance(‘test3.csv’)
 [[0.36]]
 ```
 
