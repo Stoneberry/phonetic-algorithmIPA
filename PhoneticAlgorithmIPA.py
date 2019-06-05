@@ -5,6 +5,7 @@ import os
 import csv
 from collections import defaultdict
 import itertools
+import pkg_resources
 
 
 def open_json(file):
@@ -79,35 +80,54 @@ def no(a, b):
     Функция для отсутсвия нормализации
     """
     return 1
+    
 
+def default_default():
+    
+    """
+    Открытие всех нужных файлов
+    """
 
-json_paths = ['/data/diacrit.json', '/data/cons.json', '/data/vows.json']
+    global filenames
 
-with open('/data/regs.txt', 'r', encoding='utf-8') as f:
-    reg_all_sounds, reg_comb, dia = f.readlines()
-    reg_all_sounds, reg_comb, dia = [reg_all_sounds[:-1], reg_comb[:-1], dia[:-1]]
+    with open(filenames[0], 'r', encoding='utf-8') as f:
+        reg_all_sounds, reg_comb, dia = f.readlines()
+        reg_all_sounds, reg_comb, dia = reg_all_sounds[:-1], reg_comb[:-1], dia[:-1]
+    diacrit, cons, vows = [open_json(i) for i in filenames[1:4]]
+    pattern1 = re.compile(reg_comb)
+    pattern2 = re.compile(reg_all_sounds)
 
+    return reg_all_sounds, reg_comb, dia, diacrit, cons, vows, pattern1, pattern2
+    
+  
+resource_package = 'phonetic_algorithmIPA'
+res = [ 'regs.txt', 'diacrit.json', 'cons.json', 'vows.json', 'ftable.json', 'index_column.json', 'rows.json']
+paths = ['/'.join(('data', i)) for i in res]
+filenames = [pkg_resources.resource_filename(resource_package, path) for path in paths]
 
-diacrit, cons, vows = [open_json(i) for i in json_paths]
 normal_func = {'mean': mean, 'max': max, 'min': min, False: no}
-pattern1 = re.compile(reg_comb)
-pattern2 = re.compile(reg_all_sounds)
-
+reg_all_sounds, reg_comb, dia, diacrit, cons, vows, pattern1, pattern2 = default_default()
 
 
 class PhoneticAlgorithmIPA:
     
     def __init__(self):
  
-        self.default_settings()
+        self.default_settings(user=False)
 
 
-    def default_settings(self):
+    def default_settings(self, user=True):
+        """
+        Восстанавливаем дефолтные настройки
+        """
 
-        self.feature_table = open_json('/data/ftable.json')
-        self.column_index = open_json('/data/index_column.json')
-        #self.distance_matrix = open_json('/data/non_ls_dist.json')
-        self.row = open_json('/data/rows.json')
+        if user:
+            global reg_all_sounds, reg_comb, dia, diacrit, cons, vows, pattern1, pattern2
+            reg_all_sounds, reg_comb, dia, diacrit, cons, vows, pattern1, pattern2 = default_default() 
+
+        self.feature_table = open_json(filenames[4])
+        self.column_index = open_json(filenames[5])
+        self.row = open_json(filenames[6])
     
         self.feature = {}
 
@@ -128,6 +148,10 @@ class PhoneticAlgorithmIPA:
 
 
     def dia_cond1(self, current, vows, cons, step, value):
+        
+        """
+        Проверка на дифтонг раз
+        """
 
         a = type_letter(current.value, vows, cons) == 'vow'
         b = current.previous is not None
@@ -147,6 +171,9 @@ class PhoneticAlgorithmIPA:
 
 
     def dia_applier(self, current, step, vows, cons):
+        """
+        Меняет вектор значений
+        """
         
         if isinstance(current.value, list): return current.vector
 
@@ -165,7 +192,9 @@ class PhoneticAlgorithmIPA:
     
 
     def add_value(self, current, answer, letter, step, vows, cons):
-
+        """
+        Добавляет в ответ вектор значений звука
+        """
             
         answer.append(current.vector)
         cur = current
@@ -180,6 +209,9 @@ class PhoneticAlgorithmIPA:
 
 
     def post_diacrit(self, index, length, current, value, letter):
+        """
+        Проверка на дикритики, которые идут после звука 
+        """
 
         if index == length - 1: raise ValueError('Wrong location of {}'.format(letter))
 
@@ -196,6 +228,10 @@ class PhoneticAlgorithmIPA:
 
 
     def between_diacrit(self, index, length, current, step):
+        
+        """
+        Проверка на дикритики, которые идут между звуками
+        """
 
         if 0 < index != length - 1:
                     
@@ -215,6 +251,10 @@ class PhoneticAlgorithmIPA:
 
 
     def diacritics(self, letter, index, length, current, step):
+        
+        """
+        Обрабатывает диакритики
+        """
 
         value = diacrit[letter] # 'ⁿ': ['post', {'nasal': '+'}]
 
@@ -231,6 +271,10 @@ class PhoneticAlgorithmIPA:
 
 
     def stress_number(self, length, word, index, number, current):
+        
+        """
+        Определяет кол-во ударных элементов
+        """
      
         v = 'The stress is presented incorrectly'
         
@@ -246,6 +290,10 @@ class PhoneticAlgorithmIPA:
 
 
     def stress_app(self, letter, step, current, answer, vows, cons):
+        
+        """
+        Работает с ударными звуками
+        """
 
         if type_letter(current.value, vows, cons) != 'vow':
             raise ValueError('A non vowel element is under stress')
@@ -269,6 +317,10 @@ class PhoneticAlgorithmIPA:
 
 
     def affricate(self, current, answer, vows, cons):
+        
+        """
+        Работает с аффрикатами
+        """
   
         current.vector = [current.vector]
         current.value = [current.value]
@@ -292,9 +344,12 @@ class PhoneticAlgorithmIPA:
 
 
     def digit_rule(self, letter, step, current, answer, vows, cons):
+        
+        """
+        Добавляет предыдущий элемент в ответ, если дальше идет ударный звук
+        """
 
-        if step != 0:
-            if step[0] != 1: raise ValueError('The stress is presented incorrectly')
+        if step != 0 andf step[0] != 1: raise ValueError('The stress is presented incorrectly')
             
         current, step = self.letter_parser(step, current, '', answer, vows, cons)
 
@@ -303,6 +358,10 @@ class PhoneticAlgorithmIPA:
 
 
     def dia_cond2(self, current, vows, cons):
+        
+        """
+        Проверка на дифтонг 2
+        """
 
         if not current.dia.get('syllabic') and current.previous is not None:
 
@@ -317,10 +376,12 @@ class PhoneticAlgorithmIPA:
                 if c or d:
                     current.affr = True
         return current
- 
-    
 
     def letter_parser(self, step, current, letter, answer, vows, cons, dig=False):
+        
+        """
+        Обрабатывает МФА
+        """
 
         if step != 0: 
             if step[-1] == 'main': current.dia['stress'] = '+'
@@ -345,9 +406,23 @@ class PhoneticAlgorithmIPA:
             current.vector = copy.copy(self.feature_table[letter])
         
         return current, step
+        
+        
+##    def conditions(self, word, diacrit, vows, cons):
+##    	
+##    	typs = [type(i) for i in [word, diacrit, vows, cons]]
+##    	if typs != [str, dict, list, list]:
+##            raise ValueError('Wrong input data')
 
 
-    def transcription_splitter(self, word, diacrit, vows, cons):
+    def transcription_splitter(self, word, diacrit, vows, cons, user=True):
+    
+##    	if user:
+##    	    self.conditions(word, diacrit, vows, cons)
+
+        """
+        Делит транскрипцию на МФА элементы
+        """     
 
         if word == '': return ''
 
@@ -383,7 +458,11 @@ class PhoneticAlgorithmIPA:
 
 ## --------------------------------------------------------
 
-    def sound_dist(self, a, b):
+    def sound_dist(self, a, b, user=True):
+        
+        """
+        Рассчитывет расстояния между двумя векторами
+        """
 
         similar, common, uncommon = 0, 0, 0
         
@@ -402,6 +481,10 @@ class PhoneticAlgorithmIPA:
 
 
     def different_length(self, a, len_a, b, len_b):
+        
+        """
+        Рабоатет с комплексами разной длины 
+        """
 
         res = []
 
@@ -420,6 +503,10 @@ class PhoneticAlgorithmIPA:
 
 
     def equal_length(self, a, b):
+        
+        """
+        Работает с комплексами одной длины
+        """
 
         res = [self.sound_dist(it, b[ind]) for ind, it in enumerate(a)]
 
@@ -427,6 +514,9 @@ class PhoneticAlgorithmIPA:
     
     
     def dist_affr(self, a, b):
+        """
+        Рассчитывает расстояние между комплексами звуков
+        """
 
         len_a, len_b = len(a), len(b)
 
@@ -437,6 +527,9 @@ class PhoneticAlgorithmIPA:
         
     
     def phone_dist(self, a, b):
+        """
+        Определяет с какими данными мы рабоаем 
+        """
         
         if isinstance(a, list) and isinstance(b, list):
             return self.dist_affr(a, b)
@@ -450,7 +543,11 @@ class PhoneticAlgorithmIPA:
         return self.sound_dist(a, b)
     
     
-    def lev_distance(self, a, b):
+    def lev_distance(self, a, b, user=True):
+        
+        """
+        Модифицированное расстояние Дамерау-Левенштейна
+        """
     
         # Первыми - строчки 
         # столбики - слово b
@@ -489,6 +586,9 @@ class PhoneticAlgorithmIPA:
 ## --------------------------------------------------------
 
     def check_data(self, data, normalize):
+        """
+        Проверяет данные на коректрность, делит на элементы, выдает расстояния
+        """
 
         global diacrit, vows, cons
     
@@ -517,6 +617,10 @@ class PhoneticAlgorithmIPA:
 
     def phonetic_distance(self, path, delimiter=';', typ='Non LS', total_dist=False,
                           irrelevant_features=[], normalize=False):
+        
+        """
+        Открывает файл с транскрипциями, возвращает расстояния
+        """
   
         if not path.endswith('.csv'):
             raise ValueError('Incorrect file type. It should be csv')
@@ -555,6 +659,10 @@ class PhoneticAlgorithmIPA:
 ## --------------------------------------------------------    
 
     def stressed(self, line):
+        
+        """
+        Заменяет все ударные элементы на *
+        """
     
         reg2 = '.{%s}(?:_|=)%s'
     
@@ -568,6 +676,10 @@ class PhoneticAlgorithmIPA:
     
     
     def right_part(self, index, len_right, line, right_rule, word, cons_u, vows_u):
+        
+        """
+        Обрабатывает правый контекст правила
+        """
     
         global cons, vows
     
@@ -610,6 +722,10 @@ class PhoneticAlgorithmIPA:
     
     
     def left_part(self, index, len_left, line, left_rule, word, cons_u, vows_u):
+        
+        """
+        Обрабатывает левый контекст правила
+        """
     
         global cons, vows
     
@@ -653,6 +769,10 @@ class PhoneticAlgorithmIPA:
     
     def rule_finder(self, letter, rules_dict, rules, cons_u, vows_u):
         
+        """
+        Находит правило для встретившейся буквы
+        """
+        
         def rule_finder2(letter, rules_dict, rules):
             rule = rules_dict.get(letter)
             if rule:
@@ -668,6 +788,10 @@ class PhoneticAlgorithmIPA:
     
     
     def rule_applier(self, rules_dict, word, cons_u=[], vows_u=[]):
+        
+        """
+        Применяет правила трансформаций
+        """
 
         res = [''] * len(word)
         count = 0
@@ -716,6 +840,9 @@ class PhoneticAlgorithmIPA:
     
     
     def rule_collector(self, rules_dict):
+        """
+        Группирует правила по буквам
+        """
     
         d = defaultdict(list)
     
@@ -733,6 +860,8 @@ class PhoneticAlgorithmIPA:
                              normalize=False, total_dist=False, cons_u=[], vows_u=[]):
     
         """
+        Трансформирует строки в их фонетические представления
+        
         Чувствителен к регистру
         """
     
@@ -802,6 +931,10 @@ class PhoneticAlgorithmIPA:
 
     def users_irr_features(self, irrelevant_features):
         
+        """
+        Обрабатывает нерелевантные признаки пользователя
+        """
+        
         for i in irrelevant_features:
             if i not in self.column_index:
                 raise ValueError('Incorrect irrelevant features')
@@ -809,6 +942,10 @@ class PhoneticAlgorithmIPA:
         
         
     def detect_irr_features(self, data):
+        
+        """
+        Находит нерелевантные признаки 
+        """
 
         index = 0
         
@@ -822,6 +959,10 @@ class PhoneticAlgorithmIPA:
   
     
     def ls_dist_matrix(self, data, irrelevant_features):
+        
+        """
+        Меняет таблицу соответсвий звуков и признаков с учетом нерелевантных значений
+        """
         
         if irrelevant_features != []:
             self.users_irr_features(irrelevant_features)
@@ -846,6 +987,7 @@ class PhoneticAlgorithmIPA:
     
     def add_columns(self, d):
         '''
+        Добавляет колонку (признак)
         sonorant: [+ - 0]
         '''
         
@@ -882,6 +1024,10 @@ class PhoneticAlgorithmIPA:
     
     def finish_comp(self, reg_comb, reg_all_sounds, pattern1, pattern2):
         
+        """
+        Меняет регулярые значения с учетом добавленных значений
+        """
+        
         pattern1 = re.compile(reg_comb)
         pattern2 = re.compile(reg_all_sounds)
                 
@@ -889,6 +1035,8 @@ class PhoneticAlgorithmIPA:
     def add_rows(self, d):
         
         '''
+        Добавляет звук
+        
         a: [+ - 0]
         '''
         
@@ -940,6 +1088,8 @@ class PhoneticAlgorithmIPA:
 
     def add_diacritics(self, d):
         '''
+        Добавляет диакритику
+        
         diacrit = {'ⁿ': ['post', {'nasal': '+'}]}
         '''
         
@@ -986,7 +1136,3 @@ class PhoneticAlgorithmIPA:
             if name in dia: dia = dia.replace(name, '')
             
             diacrit[name] = values
-        
-    
-    
-    
