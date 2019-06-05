@@ -23,8 +23,8 @@ Note: пакет еще находится в разработке
 Пакет включает в себя модуль phonetic_distance. Чтобы приступить к работе, инициализируйте класс PhoneticAlgorithmIPA() из модуля phonetic_distance.
 
 ```
->>> from phonetic_algorithmIPA import phonetic_distance
->>> ipa = phonetic_distance.PhoneticAlgorithmIPA()
+>>> from phonetic_algorithmIPA import ipa_distances
+>>> ipa = ipa_distances.PhoneticAlgorithmIPA()
 ```
 
 Класс имеет следующий функционал:
