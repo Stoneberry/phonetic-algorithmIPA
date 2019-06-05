@@ -144,7 +144,7 @@ default_settings обеспечивает возврат к первоначал
 
 
 
-### Дополнительно
+# Дополнительно
 В пакете также есть функции: transcription_splitter, sound_dist, lev_distance. Они являются вспомогательными, поэтому не имеют проверки на корректность входных данных. 
 
 ##### transcription_splitter(word, diacrit, vows, cons)
