@@ -142,10 +142,6 @@ add_diacritics позволяет добавить диакритический 
 ### default_settings()
 default_settings обеспечивает возврат к первоначальным артикуляционной системе признаков.
 
-### change_feature_table(dict)
-Будет скоро добавлена. Ее код находится: https://github.com/Stoneberry/phonetic_algorithm_IPA/blob/master/class.py
-
-
 # Дополнительно
 В пакете также есть функции: transcription_splitter, sound_dist, lev_distance.
 
