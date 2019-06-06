@@ -1200,3 +1200,75 @@ class PhoneticAlgorithmIPA:
             if name in dia: dia = dia.replace(name, '')
 
             diacrit[name] = values
+
+                def __item_dict__(self, name, values):
+
+        # d = {'a': [values]}
+
+        if len(values) != len(self.column_index):
+            raise ValueError('All columns have to be filed')
+                    
+        for value in values:
+            if value not in ('+', '-', '0'):
+                raise ValueError('Incorrect feature value')
+                        
+        self.feature_table[name] = values
+
+    def __feature_dict__(self, name, values):
+
+        ## d = {'feature': [values]}
+
+        if len(values) != len(self.row):
+            raise ValueError('All rows have to be filed')
+
+        feature = self.column_index[name]
+
+        for l in self.feature_table:
+            value = values[self.row[l]]
+            if value not in ('+', '-', '0'):
+                raise ValueError('Incorrect feature value')
+            self.feature_table[l][feature] = value
+
+    def __partic_values__(self, name, values):
+
+        for feature in values:
+                    
+            if feature not in self.column_index:
+                raise ValueError('Incorrect feature name')
+
+            if values[feature] not in ('+', '-', '0'):
+                raise ValueError('Incorrect feature value')
+
+            self.feature_table[name][self.column_index[feature]] = values[feature]
+
+    def change_feature_table(self, d):
+        
+        '''
+        d = {'a' : {'feature': value}}
+        d = {'a': [values]}
+        d = {'feature': [values]}
+        
+        '''
+
+        if not isinstance(d, dict):
+            raise ValueError('Wrong data type')
+
+        for i in d:
+            
+            if isinstance(d[i], list):  # d = {'feature': [values]}
+                
+                if i in self.column_index:
+                    self.__feature_dict__(i, d[i])
+
+                elif i in self.row:
+                    self.__item_dict__(i, d[i])
+                
+                else: raise ValueError('Incorrect input data')
+                    
+            
+            elif isinstance(d[i], dict) and i in self.row:
+                
+                self.__partic__values(i, d[i])
+                    
+            else: raise ValueError('Incorrect input data')
+    
