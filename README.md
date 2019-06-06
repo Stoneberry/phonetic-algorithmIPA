@@ -143,7 +143,7 @@ add_diacritics позволяет добавить диакритический 
 default_settings обеспечивает возврат к первоначальным артикуляционной системе признаков.
 
 ### change_feature_table(dict)
-Будет скоро добавлена.
+Будет скоро добавлена. Ее код находится: https://github.com/Stoneberry/phonetic_algorithm_IPA/blob/master/class.py
 
 
 # Дополнительно
@@ -195,4 +195,3 @@ default_settings обеспечивает возврат к первоначал
 >>> ipa.lev_distance(c, b)
 0.36
 ```
-
