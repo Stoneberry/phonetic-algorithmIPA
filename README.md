@@ -157,9 +157,9 @@ default_settings обеспечивает возврат к первоначал
 
 Можно использовать дефолтные списки, для этого используйте: 
 ```
->>> phonetic_distance.diacrit
->>> phonetic_distance.cons
->>> phonetic_distance.vows
+>>> ipa_distances.diacrit
+>>> ipa_distances.cons
+>>> ipa_distances.vows
 ['a', 'e', 'i', 'o', 'u', 'y', 'ã', 'ø', 'œ', 'ɑ', 'ɒ', 'ɔ', 'ɘ', 'ə', 'ɛ', 'ɞ', 'ɤ', 'ɨ', 'ɪ', 'ɯ', 'ɵ', 'ɶ', 'ʉ', 'ʊ', 'ʏ']
 ```
  
