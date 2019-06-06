@@ -392,7 +392,7 @@ class PhoneticAlgorithmIPA:
 
         return current, step
 
-    def conditions(self, word, diac, vow, con):
+    def __conditions__(self, word, diac, vow, con):
 
         '''
         Проверяет корректность входных данных, если пользователь сам решил
@@ -413,14 +413,14 @@ class PhoneticAlgorithmIPA:
         if typs != {True}:
             raise ValueError('Wrong consonant representaion')
 
-        if diac != {}:
+        if diac != {} and diac != diacrit:
             for name in diac:
                 self.__check_diacrit__(name, diac[name])
 
     def transcription_splitter(self, word, diacrit, vows, cons, user=True):
 
         if user:
-            self.conditions(word, diacrit, vows, cons)
+            self.__conditions__(word, diacrit, vows, cons)
 
         """
         Делит транскрипцию на МФА элементы
@@ -1125,6 +1125,7 @@ class PhoneticAlgorithmIPA:
             raise ValueError('{} can not be used'.format(name))
 
         if not isinstance(values, (list, tuple)):
+            print(values)
             raise ValueError('Incorrect row values type')
 
         if len(values) != 2 or name == '':
@@ -1201,7 +1202,7 @@ class PhoneticAlgorithmIPA:
 
             diacrit[name] = values
 
-                def __item_dict__(self, name, values):
+    def __item_dict__(self, name, values):
 
         # d = {'a': [values]}
 
@@ -1244,7 +1245,7 @@ class PhoneticAlgorithmIPA:
     def change_feature_table(self, d):
         
         '''
-        d = {'a' : {'feature': value}}
+        d = {'a': {'feature': value}}
         d = {'a': [values]}
         d = {'feature': [values]}
         
@@ -1252,6 +1253,9 @@ class PhoneticAlgorithmIPA:
 
         if not isinstance(d, dict):
             raise ValueError('Wrong data type')
+
+        if d == {}:
+            raise ValueError('Enter correct data')
 
         for i in d:
             
@@ -1264,11 +1268,9 @@ class PhoneticAlgorithmIPA:
                     self.__item_dict__(i, d[i])
                 
                 else: raise ValueError('Incorrect input data')
-                    
             
             elif isinstance(d[i], dict) and i in self.row:
-                
-                self.__partic__values(i, d[i])
+                self.__partic_values__(i, d[i])
                     
             else: raise ValueError('Incorrect input data')
-    
+           
