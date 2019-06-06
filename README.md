@@ -157,9 +157,10 @@ default_settings обеспечивает возврат к первоначал
 
 Можно использовать дефолтные списки, для этого используйте: 
 ```
->>> ipa_distances.diacrit
->>> ipa_distances.cons
->>> ipa_distances.vows
+>>> diacrit = ipa_distances.diacrit
+>>> cons = ipa_distances.cons
+>>> vows = ipa_distances.vows
+>>> vows
 ['a', 'e', 'i', 'o', 'u', 'y', 'ã', 'ø', 'œ', 'ɑ', 'ɒ', 'ɔ', 'ɘ', 'ə', 'ɛ', 'ɞ', 'ɤ', 'ɨ', 'ɪ', 'ɯ', 'ɵ', 'ɶ', 'ʉ', 'ʊ', 'ʏ']
 ```
  
