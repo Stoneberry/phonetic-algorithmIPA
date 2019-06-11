@@ -9,7 +9,7 @@ pip install phonetic-algorithmIPA
 
 Note: пакет еще находится в разработке, следите за версиями. 
 
-Current version: 0.1.8
+Current version: 0.1.9
 
 
 ## Обозначение ударения 
