@@ -453,7 +453,8 @@ class PhoneticAlgorithmIPA:
             elif letter in self.row or letter == '#':
                 current, step = self.__letter_parser__(step, current, letter, answer, vows, cons)
 
-            else: raise ValueError('Wrong value: {}'.format(letter))
+            else: return False
+                ## raise ValueError('Wrong value: {}'.format(letter))
 
         return answer[::-1]
 
@@ -513,7 +514,7 @@ class PhoneticAlgorithmIPA:
             len_a, len_b = len_b, len_a
 
         for i in a:
-            r = [self.sound_dist(i, l) for l in b]
+            r = [self.sound_dist(i, l, user=False) for l in b]
             res.append(min(r))
 
         ans = sum(sorted(res)[:min(len_a, len_b)])
@@ -526,7 +527,7 @@ class PhoneticAlgorithmIPA:
         Работает с комплексами одной длины
         """
 
-        res = [self.sound_dist(it, b[ind]) for ind, it in enumerate(a)]
+        res = [self.sound_dist(it, b[ind], user=False) for ind, it in enumerate(a)]
 
         return sum(res)
 
@@ -556,7 +557,7 @@ class PhoneticAlgorithmIPA:
         if isinstance(b, list):
             return self.__dist_affr__([a], b)
 
-        return self.sound_dist(a, b)
+        return self.sound_dist(a, b, user=False)
 
     def __check_lev_lists__(self, a, b):
 
@@ -566,6 +567,7 @@ class PhoneticAlgorithmIPA:
         '''
 
         lengths = set()
+        print(a, b)
 
         for value in [a, b]:
 
@@ -637,7 +639,7 @@ class PhoneticAlgorithmIPA:
         dists = []
 
         for line in data:
-
+            
             if len(line) != 2:
                 raise ValueError('Wrong row number. Check your delimiter')
 
@@ -645,14 +647,19 @@ class PhoneticAlgorithmIPA:
             else:
                 a = self.transcription_splitter(line[0], diacrit, vows, cons, user=False)
                 b = self.transcription_splitter(line[1], diacrit, vows, cons, user=False)
+                
+                if a is False or b is False:
+                    print('Wring values in line: {}'.format(str(line)))
+                    dist = None
+                else:
+                    if a == '': dist = len(b)
+                    elif b == '': dist = len(a)
+                    else: dist = self.lev_distance(a, b, user=False)
 
-                if a == '': dist = len(b)
-                if b == '': dist = len(a)
-                else: dist = self.lev_distance(a, b)
+                    dist /= normal_func.get(normalize)(len(a), len(b))
 
-                dist /= normal_func.get(normalize)(len(a), len(b))
-
-            dists.append(dist)
+            if dist is not None:
+                dists.append(dist)
 
         return dists
 
@@ -1273,4 +1280,3 @@ class PhoneticAlgorithmIPA:
                 self.__partic_values__(i, d[i])
                     
             else: raise ValueError('Incorrect input data')
-           
