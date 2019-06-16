@@ -437,7 +437,8 @@ class PhoneticAlgorithmIPA:
         for index, letter in enumerate(word):
 
             if letter == '@':
-                letter = replacements[index_replace]
+                letter = replacements
+                [index_replace]
                 index_replace += 1
 
             if letter in ('_', '='): continue
@@ -454,7 +455,6 @@ class PhoneticAlgorithmIPA:
                 current, step = self.__letter_parser__(step, current, letter, answer, vows, cons)
 
             else: return False
-                ## raise ValueError('Wrong value: {}'.format(letter))
 
         return answer[::-1]
 
@@ -567,7 +567,6 @@ class PhoneticAlgorithmIPA:
         '''
 
         lengths = set()
-        print(a, b)
 
         for value in [a, b]:
 
@@ -814,21 +813,6 @@ class PhoneticAlgorithmIPA:
             return False
         return True
 
-##    def rule_finder(self, letter, rules_dict): #, rules, cons_u, vows_u):
-##
-##        def rule_finder2(letter, rules_dict, rules):
-##            rule = rules_dict.get(letter)
-##            if rule:
-##                rules += rule
-##            return rules
-##
-##        rules = rule_finder2(letter, rules_dict, rules)
-##        if letter in vows_u:
-##            rules = rule_finder2('@', rules_dict, rules)
-##        if letter in cons_u:
-##            rules = rule_finder2('&', rules_dict, rules)
-##
-##        return rules
 
     def __rule_applier__(self, rules_dict, word, cons_u=[], vows_u=[]):
         """
@@ -844,12 +828,8 @@ class PhoneticAlgorithmIPA:
 
                 ans = letter
                 line = word
-##                rules = []
-
+                
                 if letter not in ('_', '=') or not letter.isdigit():
-
-##                    rules = self.rule_finder(letter, rules_dict, rules, cons_u, vows_u)
-##                    if rules != []:
 
                     rules = rules_dict.get(letter)
 
@@ -895,7 +875,18 @@ class PhoneticAlgorithmIPA:
             if len(line) != 3:
                 raise ValueError('There have to be 3 columns')
 
-            d[line[0]].append([line[1], line[2]])
+            if len(line[0]) != 1:
+                raise ValueError('Grapheme should be 1 symbol long')
+
+            res = re.findall('\{(.*?)\}', line[2])
+            
+            if res != []:
+                a = re.sub('\{(.*?)\}', '{}', line[2])
+                res = [i.split(',') for i in res]
+                for i in itertools.product(*res, repeat=1):
+                    d[line[0]].append([line[1], a.format(*i)])
+            else:
+                d[line[0]].append([line[1], line[2]])
 
         return d
 
@@ -941,11 +932,11 @@ class PhoneticAlgorithmIPA:
         if cons_u != [] and {isinstance(i, str) for i in cons_u} != {True}:
             raise ValueError('Incrorrect vows_u type')
 
-        with open(rules_path, 'r') as csvfile:
+        with open(rules_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=delimiter)
             rules = list(reader)
 
-        with open(data_path, 'r') as csvfile:
+        with open(data_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=delimiter)
             data = list(reader)
 
@@ -1132,7 +1123,6 @@ class PhoneticAlgorithmIPA:
             raise ValueError('{} can not be used'.format(name))
 
         if not isinstance(values, (list, tuple)):
-            print(values)
             raise ValueError('Incorrect row values type')
 
         if len(values) != 2 or name == '':
@@ -1173,37 +1163,6 @@ class PhoneticAlgorithmIPA:
                 raise ValueError('This diacritic already exists')
 
             self.__check_diacrit__(name, values)
-
-##            if not isinstance(name, str):
-##                raise ValueError('Incorrect row value type')
-##
-##            if name in ('@', '_', '=', '#'):
-##                raise ValueError('{} can not be used'.format(name))
-##
-##            if not isinstance(values, (list, tuple)):
-##                raise ValueError('Incorrect row values type')
-##
-##            if len(values) != 2 or name == '':
-##                raise ValueError('Wrong data type')
-##
-##            if not isinstance(values[0], str) or not isinstance(values[1], dict):
-##                raise ValueError('Wrong data type')
-##
-##            if values[0] not in ('pre', 'post', 'between'):
-##                raise ValueError('Wrong position type')
-##
-##            if name in diacrit:
-##                raise ValueError('This diacritic already exists')
-##
-##            if len(name) != 1:
-##                raise ValueError('Diacritic should be one item long')
-##
-##            for feach in values[1]:
-##                if feach not in self.column_index:
-##                    raise ValueError('Diacritic value should be in feature table')
-##
-##                if values[1][feach] not in ('+', '-'):
-##                    raise ValueError('Wrong diacritic value')
 
             if name in dia: dia = dia.replace(name, '')
 
@@ -1280,3 +1239,4 @@ class PhoneticAlgorithmIPA:
                 self.__partic_values__(i, d[i])
                     
             else: raise ValueError('Incorrect input data')
+
