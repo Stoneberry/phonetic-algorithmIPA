@@ -9,7 +9,7 @@ pip install phonetic-algorithmIPA
 
 Note: пакет еще находится в разработке, следите за версиями. 
 
-Current version: 0.2.2<br>
+Current version: 0.2.4<br>
 Сайт: http://stonewebsite.pythonanywhere.com/
 
 
